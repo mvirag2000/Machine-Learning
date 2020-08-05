@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>40a54f8b-34a6-4575-a3e5-7c3e3298f0b1</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>Machine_Learning.py</StartupFile>
+    <StartupFile>Val_Test.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -21,7 +21,14 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Machine_Learning.py" />
+    <Compile Include="LSTM.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Val_Test.py" />
+    <Compile Include="Parm_Search.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="style_transfer.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
