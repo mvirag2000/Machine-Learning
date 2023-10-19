@@ -46,7 +46,8 @@ model = keras.Sequential([
     layers.Dense(1)
 ])
 model.summary()
-model.compile(loss='mean_absolute_percentage_error', optimizer='adam', metrics='accuracy')
+opt = keras.optimizers.Adam(learning_rate=0.01)
+model.compile(optimizer=opt, loss='mean_squared_error', metrics=[tf.keras.metrics.RootMeanSquaredError()]) 
 history = model.fit(train_x, train_y, epochs=100, verbose=2, validation_data=(test_x, test_y)) 
 
 predicted = model.predict(test_x) * 100

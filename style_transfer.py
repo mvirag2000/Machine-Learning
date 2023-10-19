@@ -37,7 +37,7 @@ def compute_layer_style_cost(a_S, a_G):
     m, n_H, n_W, n_C = a_G.get_shape().as_list()
     a_S = tf.transpose(tf.reshape(a_S, shape=[-1, n_C]),perm=[1,0])
     a_G = tf.transpose(tf.reshape(a_G, shape=[-1, n_C]),perm=[1,0])
-    GS = tf.matmul(A,tf.transpose(a_S))
+    GS = tf.matmul(A,tf.transpose(a_S)) # This is the Gram matrix 
     GG = tf.matmul(A,tf.transpose(a_G))
     J_style_layer = tf.reduce_sum(tf.square(GS-GG))/(2 * n_C * n_H * n_W)**2
     return J_style_layer
