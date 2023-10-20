@@ -340,3 +340,6 @@ ASALocalRun/
 healthchecksdb
 /Validation.jpg
 /prices.csv
+/data_descriptions.csv
+/test.csv
+/train.csv
