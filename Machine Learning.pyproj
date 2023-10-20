@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>40a54f8b-34a6-4575-a3e5-7c3e3298f0b1</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>Loan_Default_EDA.py</StartupFile>
+    <StartupFile>Loan_Default_Model.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -22,6 +22,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Loan_Default_Model.py" />
     <Compile Include="Loan_Default_EDA.py" />
     <Compile Include="LSTM.py">
       <SubType>Code</SubType>
