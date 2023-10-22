@@ -22,6 +22,8 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ChatGPT.py" />
+    <Compile Include="Copilot.py" />
     <Compile Include="Loan_Default_Model.py" />
     <Compile Include="Loan_Default_EDA.py" />
     <Compile Include="LSTM.py">

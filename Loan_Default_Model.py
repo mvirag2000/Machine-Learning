@@ -57,7 +57,7 @@ def result_roc(name, pred_y):
     display.plot()
     plt.show()
     
-def neural_net(n_hidden=3, n_neurons=256, learning_rate=0.001):
+def neural_net(n_hidden=4, n_neurons=256, learning_rate=0.005):
     print("\n*** Hidden: "+ str(n_hidden))
     print("*** Neurons: " + str(n_neurons))
     print("*** Learning Rate: " + str(learning_rate))               
@@ -68,11 +68,23 @@ def neural_net(n_hidden=3, n_neurons=256, learning_rate=0.001):
     for layer in range(n_hidden):
         model.add(keras.layers.Dense(n_neurons, activation='relu'))
         model.add(keras.layers.BatchNormalization())
-    model.add(keras.layers.Dense(1)) 
+    model.add(keras.layers.Dense(1, activation='linear'))
     opt = keras.optimizers.Adam(learning_rate=learning_rate)
     model.compile(optimizer=opt, loss='mean_squared_error')
     model.summary()
     history = model.fit(train_data, train_y, validation_data=(test_data, test_y), epochs=3, verbose=2)
+    return model, history
+
+def neural_net2(n_hidden=4, n_neurons=256):
+    model = keras.models.Sequential()
+    model.add(keras.Input(train_data.shape[1],))
+    for layer in range(n_hidden):
+        model.add(keras.layers.Dense(n_neurons, activation='relu'))
+        model.add(keras.layers.BatchNormalization())
+    model.add(keras.layers.Dense(1)) 
+    model.compile(optimizer='adam', loss='mean_squared_error')
+    model.summary()
+    history = model.fit(train_data, train_y, validation_data=(test_data, test_y), epochs=10, verbose=2)
     return model, history
 
 def history_plot(history):
@@ -84,6 +96,7 @@ def history_plot(history):
     plt.legend(['train', 'val'], loc='upper right')
     plt.show()
 
+'''
 forest_class = RandomForestClassifier(max_depth=2, n_estimators=1000, criterion="entropy").fit(train_data, train_y) # 0.73
 pred_y = forest_class.predict_proba(test_data)[:, 1]
 result_roc("Forest Classifier", pred_y) 
@@ -95,6 +108,7 @@ result_roc("Linear Regression", pred_y)
 forest_reg = RandomForestRegressor(max_depth=4).fit(train_data, train_y) # 0.72
 pred_y = forest_reg.predict(test_data)
 result_roc("Random Forest", pred_y)
+'''
 
 nn_model, history = neural_net() # 0.76
 pred_y = nn_model.predict(test_data)
