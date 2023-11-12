@@ -3,7 +3,7 @@ import pandas as pd
 from pandas.api.types import is_numeric_dtype
 import matplotlib.pyplot as plt
 from matplotlib import cm
-from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
@@ -11,7 +11,8 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler 
 from sklearn.tree import DecisionTreeRegressor, export_text
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
-from sklearn.metrics import roc_curve, roc_auc_score, RocCurveDisplay
+from sklearn.metrics import roc_curve, roc_auc_score
+import statsmodels.api as sm  
 import seaborn as sns
 sns.set_theme() 
 import tensorflow as tf
@@ -47,16 +48,10 @@ full_pipeline = ColumnTransformer([
 X_train = full_pipeline.fit_transform(train_temp)
 X_test = full_pipeline.transform(test_temp) # Do NOT re-fit 
 feature_names = num_vars + full_pipeline.named_transformers_['cat'].get_feature_names_out(input_features=cat_vars).tolist()
+print(feature_names)
 
 ### MODELS START HERE ###
-
-def result_roc(name, y_pred):
-    fpr, tpr, thresholds = roc_curve(y_test, y_pred)
-    roc_auc = roc_auc_score(fpr, tpr)
-    display = RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=roc_auc, estimator_name=name)
-    display.plot()
-    plt.show()
-    
+   
 def neural_net(n_hidden=4, n_neurons=256, learning_rate=0.005):
     print("\n*** Hidden: "+ str(n_hidden))
     print("*** Neurons: " + str(n_neurons))
@@ -84,8 +79,10 @@ def history_plot(history):
     plt.legend(['train', 'val'], loc='upper right')
     plt.show()
 
-lin_reg = LinearRegression(n_jobs=-1).fit(X_train, y_train)  # 0.75 
-y_pred = lin_reg.predict(X_test)
+# lin_reg = LinearRegression(n_jobs=-1).fit(X_train, y_train)  # 0.75 
+model = sm.OLS(y_train, X_train).fit()
+y_pred = model.predict(X_test)
+print(model.summary())
 
 '''
 forest_class = RandomForestClassifier(max_depth=4, n_jobs=-1, verbose=1).fit(X_train, y_train) # 0.73
@@ -100,44 +97,48 @@ y_pred = nn_model.predict(X_test)
 history_plot(history)
 '''
 
-# Plot the ROC curve
-fpr, tpr, thresholds = roc_curve(y_test, y_pred)
-roc_auc = roc_auc_score(y_test, y_pred)
-plt.figure()
-plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'ROC curve (area = {roc_auc:.2f})')
-plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
-plt.xlim([0.0, 1.0])
-plt.ylim([0.0, 1.05])
-plt.xlabel('False Positive Rate')
-plt.ylabel('True Positive Rate')
-plt.title('Receiver Operating Characteristic (ROC)')
-plt.legend(loc='lower right')
-plt.show()
+def result_roc(y_pred, y_test, name):
+    fpr, tpr, thresholds = roc_curve(y_test, y_pred)
+    roc_auc = roc_auc_score(y_test, y_pred)
+    plt.figure()
+    plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'ROC curve (area = {roc_auc:.2f})')
+    plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver Operating Characteristic (ROC) for ' + name)
+    plt.legend(loc='lower right')
+    plt.show()
 
-confusion = pd.DataFrame({"Proba":y_pred, "Actual":y_test})
-P = y_test.sum()
-N = y_test.count() - P
-specificity = []
-sensitivity = []
-cutoff = np.arange(.01, 1, .01)
-for t in cutoff:
-    confusion["Bool"] = (confusion["Proba"] >= t) * 1
-    confusion.eval("TP = ((Actual == 1) and (Bool == 1)) * 1", inplace=True)
-    confusion.eval("TN = ((Actual == 0) and (Bool == 0)) * 1", inplace=True)
-    TP = confusion["TP"].sum()
-    TN = confusion["TN"].sum()
-    TPR = TP / P if P > 0 else 1
-    TNR = TN / N if N > 0 else 1 
-    specificity.append(TNR)
-    sensitivity.append(TPR)
+def confusion_chart(y_pred, y_test):
+    confusion = pd.DataFrame({"Proba":y_pred, "Actual":y_test})
+    P = y_test.sum()
+    N = y_test.count() - P
+    specificity = []
+    sensitivity = []
+    cutoff = np.arange(.01, 1, .01)
+    for t in cutoff:
+        confusion["Bool"] = (confusion["Proba"] >= t) * 1
+        confusion.eval("TP = ((Actual == 1) and (Bool == 1)) * 1", inplace=True)
+        confusion.eval("TN = ((Actual == 0) and (Bool == 0)) * 1", inplace=True)
+        TP = confusion["TP"].sum()
+        TN = confusion["TN"].sum()
+        TPR = TP / P if P > 0 else 1
+        TNR = TN / N if N > 0 else 1 
+        specificity.append(TNR)
+        sensitivity.append(TPR)
 
-plt.figure()
-plt.plot(cutoff, specificity, color='darkorange', lw=2, label='Specificity (TNR)')
-plt.plot(cutoff, sensitivity, color='navy', lw=2, label='Sensitivity (TPR)')
-plt.xlim([0.0, 1.0])
-plt.ylim([-0.05, 1.05])
-plt.xlabel('Threshold Value')
-plt.ylabel('True Pos/Neg Rate')
-plt.title('Truth Rates v. Proba Cutoff')
-plt.legend(loc='center right')
-plt.show()
+    plt.figure()
+    plt.plot(cutoff, specificity, color='darkorange', lw=2, label='Specificity (TNR)')
+    plt.plot(cutoff, sensitivity, color='navy', lw=2, label='Sensitivity (TPR)')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([-0.05, 1.05])
+    plt.xlabel('Threshold Value')
+    plt.ylabel('True Pos/Neg Rate')
+    plt.title('Truth Rates v. Proba Cutoff')
+    plt.legend(loc='center right')
+    plt.show()
+
+result_roc(y_pred, y_test, "Regression")    
+confusion_chart(y_pred, y_test) 
