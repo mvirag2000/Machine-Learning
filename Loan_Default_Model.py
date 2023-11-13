@@ -3,6 +3,7 @@ import pandas as pd
 from pandas.api.types import is_numeric_dtype
 import matplotlib.pyplot as plt
 from matplotlib import cm
+import matplotlib.animation as animation
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.impute import SimpleImputer
@@ -142,3 +143,19 @@ def confusion_chart(y_pred, y_test):
 
 result_roc(y_pred, y_test, "Regression")    
 confusion_chart(y_pred, y_test) 
+
+# Plot sample cases 
+sample = train_set.sample(n=200, random_state=42)
+fig = plt.figure(figsize=(8, 6))
+ax = fig.add_subplot(111, projection='3d')
+mask = sample["Default"] == 1 
+ax.scatter(sample.loc[mask, 'Age'], sample.loc[mask, 'InterestRate'], sample.loc[mask, 'CreditScore'], c='red', label='1', marker='o')
+ax.scatter(sample.loc[-mask, 'Age'], sample.loc[-mask, 'InterestRate'], sample.loc[-mask, 'CreditScore'], c='green', label='0', marker='o')
+ax.set_xlabel('Age')
+ax.set_ylabel('InterestRate')
+ax.set_zlabel('CreditScore')
+ax.set_title('3D Scatter Plot')
+def rotate(angle): 
+    ax.view_init(elev=35, azim=angle)
+rot_animation = animation.FuncAnimation(fig, rotate, frames=np.arange(0, 360, 2))
+plt.show()
