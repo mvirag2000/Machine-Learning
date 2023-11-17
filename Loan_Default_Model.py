@@ -112,19 +112,18 @@ def result_roc(y_pred, y_test, name):
     plt.legend(loc='lower right')
     plt.show()
 
-def confusion_chart(y_pred, y_test):
-    confusion = pd.DataFrame({"Proba":y_pred, "Actual":y_test})
+def confusion_chart(test_results):
     P = y_test.sum()
     N = y_test.count() - P
     specificity = []
     sensitivity = []
     cutoff = np.arange(.01, 1, .01)
     for t in cutoff:
-        confusion["Bool"] = (confusion["Proba"] >= t) * 1
-        confusion.eval("TP = ((Actual == 1) and (Bool == 1)) * 1", inplace=True)
-        confusion.eval("TN = ((Actual == 0) and (Bool == 0)) * 1", inplace=True)
-        TP = confusion["TP"].sum()
-        TN = confusion["TN"].sum()
+        test_results["Bool"] = (test_results["Proba"] >= t) * 1
+        test_results.eval("TP = ((Actual == 1) and (Bool == 1)) * 1", inplace=True)
+        test_results.eval("TN = ((Actual == 0) and (Bool == 0)) * 1", inplace=True)
+        TP = test_results["TP"].sum()
+        TN = test_results["TN"].sum()
         TPR = TP / P if P > 0 else 1
         TNR = TN / N if N > 0 else 1 
         specificity.append(TNR)
@@ -142,7 +141,9 @@ def confusion_chart(y_pred, y_test):
     plt.show()
 
 result_roc(y_pred, y_test, "Regression")    
-confusion_chart(y_pred, y_test) 
+test_results = pd.DataFrame({"Proba":y_pred, "Actual":y_test})
+test_results.to_csv("regression.csv", index=False)
+confusion_chart(test_results) 
 
 # Plot sample cases 
 sample = train_set.sample(n=200, random_state=42)
@@ -156,6 +157,6 @@ ax.set_ylabel('InterestRate')
 ax.set_zlabel('CreditScore')
 ax.set_title('3D Scatter Plot')
 def rotate(angle): 
-    ax.view_init(elev=35, azim=angle)
-rot_animation = animation.FuncAnimation(fig, rotate, frames=np.arange(0, 360, 2))
+    ax.view_init(elev=25, azim=angle)
+rot_animation = animation.FuncAnimation(fig, rotate, frames=np.arange(0, 360, 1))
 plt.show()
