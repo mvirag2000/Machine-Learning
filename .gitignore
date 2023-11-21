@@ -345,3 +345,5 @@ healthchecksdb
 /train.csv
 /Engineer/prompt
 /regression.csv
+/trees.csv
+/neural.csv
