@@ -11,7 +11,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler 
 from sklearn.tree import DecisionTreeRegressor, export_text
-from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier, GradientBoostingClassifier
 from sklearn.metrics import roc_curve, roc_auc_score
 import statsmodels.api as sm  
 import seaborn as sns
@@ -80,10 +80,8 @@ def history_plot(history):
     plt.legend(['train', 'val'], loc='upper right')
     plt.show()
 
-# lin_reg = LinearRegression(n_jobs=-1).fit(X_train, y_train)  # 0.75 
-model = sm.OLS(y_train, X_train).fit()
-y_pred = model.predict(X_test)
-print(model.summary())
+model = GradientBoostingClassifier(n_estimators=500, max_depth=2).fit(X_train, y_train)
+y_pred = model.predict_proba(X_test)[:, 1]
 
 '''
 forest_class = RandomForestClassifier(max_depth=4, n_jobs=-1, verbose=1).fit(X_train, y_train) # 0.73
@@ -96,6 +94,12 @@ result_roc("Random Forest", y_pred)
 nn_model, history = neural_net(3, 256) # 0.76
 y_pred = nn_model.predict(X_test)
 history_plot(history)
+
+# lin_reg = LinearRegression(n_jobs=-1).fit(X_train, y_train)  # 0.75 
+model = sm.OLS(y_train, X_train).fit()
+y_pred = model.predict(X_test)
+print(model.summary())
+
 '''
 
 def result_roc(y_pred, y_test, name):
@@ -140,9 +144,10 @@ def confusion_chart(test_results):
     plt.legend(loc='center right')
     plt.show()
 
-result_roc(y_pred, y_test, "Regression")    
+result_roc(y_pred, y_test, "Neural Net")    
+
 test_results = pd.DataFrame({"Proba":y_pred, "Actual":y_test})
-test_results.to_csv("regression.csv", index=False)
+test_results.to_csv("neural.csv", index=False)
 confusion_chart(test_results) 
 
 # Plot sample cases 
