@@ -63,7 +63,7 @@ def neural_net(n_hidden=4, n_neurons=256, learning_rate=0.005):
     model.add(keras.Input(X_train.shape[1],))
     for layer in range(n_hidden):
         model.add(keras.layers.Dense(n_neurons, activation='relu'))
-        # model.add(keras.layers.BatchNormalization())
+        model.add(keras.layers.BatchNormalization())
     model.add(keras.layers.Dense(1, activation='linear'))
     opt = keras.optimizers.Adam(learning_rate=learning_rate)
     model.compile(optimizer=opt, loss='mean_squared_error')
